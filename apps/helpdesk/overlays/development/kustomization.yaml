@@ -30,11 +30,14 @@ patches:
 commonAnnotations:
   gitops.platform/release-sha: 3bf1dffef919c85a7a74399ea16cacc403ce9f0b
 
+commonAnnotations:
+  gitops.platform/release-sha: 8ef36e502016f9430487db1e37b7d41044d08c39
+
 images:
   - name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
     newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
-    digest: sha256:d0e5362a68e06846429aae6fda6020a7e2f94d74bc9cfc4325b4a2d229a2e4b3
+    digest: sha256:3fbc543b7070120e42f30caf3823923c9ba0ba393d373eabeb510044e89e1637
 
   - name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
     newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
-    digest: sha256:d3d2169eb6e7a5e385a78c31ef7395c9ccfacc84b3ac9d039b42bea97f5313d4
+    digest: sha256:35337f1f4ff30384ce54ea1f519ff8d04b2f5a07dd91a0bb811c62ae5d0231e1
