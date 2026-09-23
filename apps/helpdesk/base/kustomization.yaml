@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - api.yaml
+  - frontend.yaml
+  - redis.yaml
+  - postgres-init-configmap.yaml
+  - postgres.yaml
+  - gateway-config.yaml
+  - gateway.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: helpdesk
+      app.kubernetes.io/managed-by: argocd

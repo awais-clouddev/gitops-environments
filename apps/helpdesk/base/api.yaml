@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helpdesk-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: helpdesk-api
+  template:
+    metadata:
+      labels:
+        app: helpdesk-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api:sha-placeholder
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          env:
+            - name: DATABASE_HOST
+              value: helpdesk-postgres
+            - name: REDIS_HOST
+              value: helpdesk-redis
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: helpdesk-secrets
+                  key: database-name
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: helpdesk-secrets
+                  key: database-user
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: helpdesk-secrets
+                  key: database-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helpdesk-api
+spec:
+  selector:
+    app: helpdesk-api
+  ports:
+    - port: 8000
+      targetPort: 8000
