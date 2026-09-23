@@ -27,11 +27,14 @@ patches:
         path: /spec/replicas
         value: 1
 
+commonAnnotations:
+  gitops.platform/release-sha: 3bf1dffef919c85a7a74399ea16cacc403ce9f0b
+
 images:
   - name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
     newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
-    digest: sha256:c2c92a681372acacb108d523b1ff76d995a92f84f6b9d024b6e52ad5bdf448d4
+    digest: sha256:d0e5362a68e06846429aae6fda6020a7e2f94d74bc9cfc4325b4a2d229a2e4b3
 
   - name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
     newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
-    digest: sha256:7d1cc37f094de13a2e917c29fb63eaaec3111c9cbb6d22e9fa1230d74ac3a01f
+    digest: sha256:d3d2169eb6e7a5e385a78c31ef7395c9ccfacc84b3ac9d039b42bea97f5313d4
