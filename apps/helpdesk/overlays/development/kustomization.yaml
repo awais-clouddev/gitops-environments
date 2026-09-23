@@ -33,7 +33,7 @@ commonAnnotations:
 images:
   - name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
     newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
-    digest: sha256:d0e5362a68e06846429aae6fda6020a7e2f94d74bc9cfc4325b4a2d229a2e4b3
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
 
   - name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
     newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
