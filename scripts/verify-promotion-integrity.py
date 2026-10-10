@@ -1,53 +1,42 @@
 #!/usr/bin/env python3
-
 from pathlib import Path
 import re
 import sys
+import yaml
 
-DEV = Path("apps/helpdesk/overlays/development/kustomization.yaml")
-STAGING = Path("apps/helpdesk/overlays/staging/kustomization.yaml")
+BASE = Path("apps/helpdesk/overlays")
+IMAGES = {
+    "ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api",
+    "ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend",
+}
 
-IMAGES = [
-    "gitops-cicd-deployment-platform-api",
-    "gitops-cicd-deployment-platform-frontend",
-]
+def read_digests(environment):
+    path = BASE / environment / "kustomization.yaml"
+    data = yaml.safe_load(path.read_text())
+    result = {}
 
+    for image in data.get("images", []):
+        name = image.get("name")
+        if name in IMAGES:
+            digest = image.get("digest", "")
+            if not re.fullmatch(r"sha256:[a-f0-9]{64}", digest):
+                raise SystemExit(f"Invalid digest: {name} in {environment}")
+            if name in result:
+                raise SystemExit(f"Duplicate image: {name}")
+            result[name] = digest
 
-def digest_for(path, image):
-    text = path.read_text()
+    if set(result) != IMAGES:
+        raise SystemExit(f"Missing required images in {environment}")
 
-    pattern = (
-        rf"name:\s+ghcr\.io/awais-clouddev/{re.escape(image)}.*?"
-        rf"digest:\s+(sha256:[a-f0-9]{{64}})"
-    )
+    return result
 
-    match = re.search(pattern, text, re.S)
+development = read_digests("development")
+staging = read_digests("staging")
 
-    if not match:
-        raise SystemExit(f"Missing immutable digest for {image} in {path}")
+for name in sorted(IMAGES):
+    print(f"{name}: {'PASS' if development[name] == staging[name] else 'FAIL'}")
 
-    return match.group(1)
+if development != staging:
+    sys.exit("PROMOTION INTEGRITY: FAIL")
 
-
-failed = False
-
-for image in IMAGES:
-    dev = digest_for(DEV, image)
-    staging = digest_for(STAGING, image)
-
-    print(f"{image}")
-    print(f"  development: {dev}")
-    print(f"  staging:     {staging}")
-
-    if dev != staging:
-        print("  RESULT: FAIL - artifacts differ")
-        failed = True
-    else:
-        print("  RESULT: PASS - identical immutable artifact")
-
-if failed:
-    sys.exit(1)
-
-print()
 print("PROMOTION INTEGRITY: PASS")
-print("Development and staging use the exact same image digests.")

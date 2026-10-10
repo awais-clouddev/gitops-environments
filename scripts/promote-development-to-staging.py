@@ -1,58 +1,37 @@
 #!/usr/bin/env python3
-
 from pathlib import Path
 import re
+import yaml
 
 DEV = Path("apps/helpdesk/overlays/development/kustomization.yaml")
 STAGING = Path("apps/helpdesk/overlays/staging/kustomization.yaml")
 
-if not DEV.exists():
-    raise SystemExit(f"Missing: {DEV}")
+api = "ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api"
+frontend = "ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend"
 
-if not STAGING.exists():
-    raise SystemExit(f"Missing: {STAGING}")
+dev = yaml.safe_load(DEV.read_text())
+staging = yaml.safe_load(STAGING.read_text())
 
-dev_text = DEV.read_text()
-staging_text = STAGING.read_text()
+def image_digests(data):
+    images = data.get("images", [])
+    result = {}
+    for image in images:
+        name = image.get("name")
+        if name in (api, frontend):
+            digest = image.get("digest", "")
+            if not re.fullmatch(r"sha256:[a-f0-9]{64}", digest):
+                raise SystemExit(f"Invalid digest for {name}")
+            result[name] = digest
+    if set(result) != {api, frontend}:
+        raise SystemExit("Missing API or frontend image")
+    return result
 
-api_match = re.search(
-    r'name:\s+ghcr\.io/awais-clouddev/gitops-cicd-deployment-platform-api.*?'
-    r'digest:\s+(sha256:[a-f0-9]{64})',
-    dev_text,
-    re.S,
-)
+source = image_digests(dev)
+image_digests(staging)
 
-frontend_match = re.search(
-    r'name:\s+ghcr\.io/awais-clouddev/gitops-cicd-deployment-platform-frontend.*?'
-    r'digest:\s+(sha256:[a-f0-9]{64})',
-    dev_text,
-    re.S,
-)
+for image in staging["images"]:
+    if image["name"] in source:
+        image["digest"] = source[image["name"]]
 
-if not api_match or not frontend_match:
-    raise SystemExit("Could not find immutable development digests")
-
-api_digest = api_match.group(1)
-frontend_digest = frontend_match.group(1)
-
-marker = "\nimages:\n"
-
-if marker in staging_text:
-    staging_text = staging_text.split(marker)[0].rstrip() + "\n"
-
-staging_text += f"""
-images:
-  - name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
-    newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
-    digest: {api_digest}
-
-  - name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
-    newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
-    digest: {frontend_digest}
-"""
-
-STAGING.write_text(staging_text)
-
-print("Promotion complete")
-print(f"API:      {api_digest}")
-print(f"Frontend: {frontend_digest}")
+STAGING.write_text(yaml.safe_dump(staging, sort_keys=False))
+print("PASS: Staging promoted using development image digests")
