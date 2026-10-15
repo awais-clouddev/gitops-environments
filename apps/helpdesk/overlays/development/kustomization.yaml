@@ -1,40 +1,26 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: helpdesk-development
-
 resources:
-  - ../../base
-
+- ../../base
 labels:
-  - pairs:
-      app.kubernetes.io/environment: development
-
+- pairs:
+    app.kubernetes.io/environment: development
 patches:
-  - target:
-      kind: Deployment
-      name: helpdesk-api
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
-
-  - target:
-      kind: Deployment
-      name: helpdesk-frontend
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
-
+- target:
+    kind: Deployment
+    name: helpdesk-api
+  patch: "- op: replace\n  path: /spec/replicas\n  value: 1"
+- target:
+    kind: Deployment
+    name: helpdesk-frontend
+  patch: "- op: replace\n  path: /spec/replicas\n  value: 1"
 commonAnnotations:
-  gitops.platform/release-sha: 3bf1dffef919c85a7a74399ea16cacc403ce9f0b
-
+  gitops.platform/release-sha: f5b376905d2325dd7d529888b4ee8fbea875325f
 images:
-  - name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
-    newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
-    digest: sha256:d0e5362a68e06846429aae6fda6020a7e2f94d74bc9cfc4325b4a2d229a2e4b3
-
-  - name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
-    newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
-    digest: sha256:d3d2169eb6e7a5e385a78c31ef7395c9ccfacc84b3ac9d039b42bea97f5313d4
+- name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
+  newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-api
+  digest: sha256:448812f91fdcdec5bf47cd688c3818433a757e324f4555ad089ddc5c4049bc57
+- name: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
+  newName: ghcr.io/awais-clouddev/gitops-cicd-deployment-platform-frontend
+  digest: sha256:4a8ed8ce9c40cee7cbb1f7cdb0105181fd0ab2b773e6f305be63fe0fc35490ea
