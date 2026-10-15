@@ -8,3 +8,7 @@ This repository will contain Kubernetes and Kustomize configuration for:
 - staging
 
 Argo CD will reconcile Kubernetes from this repository.
+
+## Verification Scope
+
+See [environment and verification scope](docs/validation-scope.md).

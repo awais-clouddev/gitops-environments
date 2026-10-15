@@ -1,0 +1,37 @@
+name: Validate GitOps overlays
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Install Python dependency
+        run: python3 -m pip install PyYAML==6.0.3
+
+      - name: Install pinned kubectl
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=v1.37.0
+          base="https://dl.k8s.io/release/$version/bin/linux/amd64"
+          curl --fail --location --retry 3 -o kubectl "$base/kubectl"
+          curl --fail --location --retry 3 -o kubectl.sha256 "$base/kubectl.sha256"
+          echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+          sudo install -m 0755 kubectl /usr/local/bin/kubectl
+          rm kubectl kubectl.sha256
+
+      - name: Validate both overlays
+        run: python3 scripts/validate-overlays.py
